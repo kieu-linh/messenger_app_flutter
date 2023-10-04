@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_flutter/models/chat_model.dart';
+import 'package:chat_flutter/pages/widgets/buildAvatar.dart';
 import 'package:chat_flutter/pages/widgets/build_select.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -18,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   ScrollController scollController = ScrollController();
   bool isSwitch = false;
   bool isReply = false;
-  ChatModel chatReply = ChatModel();
+  ChatModel? chatReply;
   List<SvgPicture> iconList1 = [
     SvgPicture.asset('assets/icons/like.svg', height: 30.0, width: 30.0),
     SvgPicture.asset('assets/icons/love.svg', height: 30.0, width: 30.0),
@@ -55,6 +55,7 @@ class _HomePageState extends State<HomePage> {
 
     isReply = false;
     FakeChats.chats.add(newChat);
+
     messageController.clear();
     _scrollScreen();
     setState(() {});
@@ -150,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                                   : MainAxisAlignment.start,
                               children: [
                                 if (!isMe) ...[
-                                  _buildAvatar(chat),
+                                  BuildAvatar(chat),
                                   const SizedBox(width: 6.0),
                                 ],
                                 Stack(
@@ -180,7 +181,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 if (isMe) ...[
                                   const SizedBox(width: 6.0),
-                                  _buildAvatar(chat),
+                                  BuildAvatar(chat),
                                 ],
                               ],
                             ),
@@ -231,16 +232,18 @@ class _HomePageState extends State<HomePage> {
                                     borderRadius: BorderRadius.circular(10.0)),
                                 child: Column(
                                   children: [
-                                    BuildSelect(
-                                        onPressed: () {
-                                          isReply = true;
-                                          chatReply = chat;
-                                          chat.isShowFeeling = false;
-                                          setState(() {});
-                                        },
-                                        text: 'Trả lời',
-                                        icon: const Icon(Icons.reply)),
-                                    const Divider(color: Colors.grey),
+                                    if (!(chat.isRecall ?? false))
+                                      BuildSelect(
+                                          onPressed: () {
+                                            isReply = true;
+                                            chatReply = chat;
+                                            chat.isShowFeeling = false;
+                                            setState(() {});
+                                          },
+                                          text: 'Trả lời',
+                                          icon: const Icon(Icons.reply)),
+                                    if (!(chat.isRecall ?? false))
+                                      const Divider(color: Colors.grey),
                                     if (isMe)
                                       BuildSelect(
                                           onPressed: () {
@@ -306,14 +309,14 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        ((chatReply.user ?? UserModel()).id ?? '') != '2'
-                            ? 'Đang trả lời ${chatReply.user?.name ?? ''}'
+                        ((chatReply?.user ?? UserModel()).id ?? '') != '2'
+                            ? 'Đang trả lời ${chatReply?.user?.name ?? ''}'
                             : 'Đang trả lời chính mình ',
                         style: const TextStyle(
                             color: Colors.orange, fontSize: 12.0),
                       ),
                       Text(
-                        chatReply.message ?? '-.-',
+                        chatReply?.message ?? '-.-',
                         style: const TextStyle(
                             color: Colors.white, fontSize: 12.0),
                         maxLines: 1,
@@ -327,6 +330,7 @@ class _HomePageState extends State<HomePage> {
                 child: GestureDetector(
                   onTap: () {
                     isReply = false;
+                    chatReply = null;
                     setState(() {});
                   },
                   child: const CircleAvatar(
@@ -513,29 +517,6 @@ class _HomePageState extends State<HomePage> {
             ),
           )
         ],
-      ),
-    );
-  }
-
-  ClipRRect _buildAvatar(ChatModel chat) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16.0),
-      child: CachedNetworkImage(
-        imageUrl: chat.user?.image ?? '',
-        width: 32.0,
-        height: 32.0,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => const Center(
-          child: SizedBox.square(
-            dimension: 24.0,
-            child: CircularProgressIndicator(strokeWidth: 2.6),
-          ),
-        ),
-        errorWidget: (context, url, error) => const CircleAvatar(
-          radius: 16.0,
-          backgroundColor: Colors.orange,
-          child: Icon(Icons.error_outline, color: Colors.white),
-        ),
       ),
     );
   }
