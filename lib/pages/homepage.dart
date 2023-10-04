@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:chat_flutter/models/chat_model.dart';
-import 'package:chat_flutter/pages/widgets/buildAvatar.dart';
+import 'package:chat_flutter/pages/widgets/build_avatar.dart';
 import 'package:chat_flutter/pages/widgets/build_select.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
